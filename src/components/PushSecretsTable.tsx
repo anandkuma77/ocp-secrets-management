@@ -169,23 +169,18 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
       }`;
       const conditionStatus = getPushSecretStatus(pushSecret);
 
-      // ClusterPushSecret nests display fields in spec.pushSecretSpec; PushSecret has them on spec
-      const displaySpec = isCluster
-        ? (pushSecret as ClusterPushSecret).spec?.pushSecretSpec
-        : (pushSecret as PushSecret).spec;
-
       // Get secret store references
-      const secretStoreRefs = displaySpec?.secretStoreRefs || [];
+      const secretStoreRefs = pushSecret.spec?.secretStoreRefs || [];
       const secretStoreText =
         secretStoreRefs.length > 0
           ? secretStoreRefs.map((ref) => `${ref.name} (${ref.kind})`).join(', ')
           : 'None';
 
       // Get source secret name
-      const sourceSecret = displaySpec?.selector?.secret?.name || 'Unknown';
+      const sourceSecret = pushSecret.spec?.selector?.secret?.name || 'Unknown';
 
       // Get refresh interval
-      const refreshInterval = displaySpec?.refreshInterval || 'Default';
+      const refreshInterval = pushSecret.spec?.refreshInterval || 'Default';
 
       const resourceType = isCluster ? 'ClusterPushSecret' : 'PushSecret';
       const namespace = isCluster ? 'Cluster-wide' : pushSecret.metadata.namespace;

@@ -223,12 +223,10 @@ import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
   }
   output += `}\n\n`;
 
-  // Generate model reference constant (apiVersion/apiGroup for K8sModel; version/group for K8sGroupVersionKind)
+  // Generate model reference constant
   output += `export const ${kind}Model = {\n`;
   output += `  apiVersion: '${storageVersion.name}',\n`;
   output += `  apiGroup: '${group}',\n`;
-  output += `  version: '${storageVersion.name}',\n`;
-  output += `  group: '${group}',\n`;
   output += `  kind: '${kind}',\n`;
   output += `  plural: '${crd.spec.names.plural}',\n`;
   output += `  namespaced: ${scope === 'Namespaced'},\n`;

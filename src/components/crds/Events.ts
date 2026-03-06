@@ -1,64 +1,68 @@
 /**
- * Core Kubernetes Event model and helpers for use with useK8sWatchResource.
- * Events are core/v1 resources (not from CRDs).
+ * Core Kubernetes Event model and helpers for ResourceInspect (event stream).
  */
 
-import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-
-/** Core v1 Event model; includes version/group for useK8sWatchResource groupVersionKind. */
-export const EventModel: K8sModel & { version: string; group: string } = {
-  abbr: 'Ev',
-  apiVersion: 'v1',
-  apiGroup: '',
-  version: 'v1',
+/** Core v1 Event - groupVersionKind for useK8sWatchResource */
+export const EventModel = {
   group: '',
+  version: 'v1',
   kind: 'Event',
-  label: 'Event',
-  labelPlural: 'Events',
   plural: 'events',
   namespaced: true,
 } as const;
 
-/** Minimal Event shape for listing (involvedObject, reason, message, lastTimestamp). */
+/** Minimal Kubernetes Event shape (core/v1 Event). */
 export interface K8sEvent {
+  apiVersion?: string;
+  kind?: string;
   metadata?: {
     name?: string;
     namespace?: string;
     creationTimestamp?: string;
+    [key: string]: unknown;
   };
   involvedObject?: {
     kind?: string;
     name?: string;
     namespace?: string;
-    uid?: string;
-    apiVersion?: string;
+    [key: string]: unknown;
   };
   reason?: string;
   message?: string;
+  type?: string;
+  eventTime?: string;
   lastTimestamp?: string;
   firstTimestamp?: string;
-  type?: string;
+  source?: {
+    component?: string;
+    host?: string;
+    [key: string]: unknown;
+  };
   count?: number;
+  [key: string]: unknown;
 }
 
 /**
- * Maps URL resourceType (e.g. 'certificates', 'clusterissuers') to the Kubernetes
- * kind string used in Event.involvedObject.kind for field selectors.
+ * URL path segment (plural, lowercase) -> Kubernetes Kind (PascalCase) for Event involvedObject.kind.
+ * Used when watching Events filtered by involvedObject.kind for the inspect page.
+ */
+const RESOURCE_TYPE_TO_KIND: Record<string, string> = {
+  certificates: 'Certificate',
+  issuers: 'Issuer',
+  clusterissuers: 'ClusterIssuer',
+  externalsecrets: 'ExternalSecret',
+  clusterexternalsecrets: 'ClusterExternalSecret',
+  secretstores: 'SecretStore',
+  clustersecretstores: 'ClusterSecretStore',
+  pushsecrets: 'PushSecret',
+  clusterpushsecrets: 'ClusterPushSecret',
+  secretproviderclasses: 'SecretProviderClass',
+};
+
+/**
+ * Returns the Kubernetes Kind string for the given resource type (URL path segment).
+ * Used to build the Events field selector (involvedObject.kind=...).
  */
 export function getInvolvedObjectKind(resourceType: string): string {
-  const kindMap: Record<string, string> = {
-    certificates: 'Certificate',
-    issuers: 'Issuer',
-    clusterissuers: 'ClusterIssuer',
-    certificaterequests: 'CertificateRequest',
-    externalsecrets: 'ExternalSecret',
-    clusterexternalsecrets: 'ClusterExternalSecret',
-    secretstores: 'SecretStore',
-    clustersecretstores: 'ClusterSecretStore',
-    pushsecrets: 'PushSecret',
-    clusterpushsecrets: 'ClusterPushSecret',
-    secretproviderclasses: 'SecretProviderClass',
-    secretproviderclasspodstatuses: 'SecretProviderClassPodStatus',
-  };
-  return kindMap[resourceType] ?? resourceType;
+  return RESOURCE_TYPE_TO_KIND[resourceType] ?? resourceType;
 }

@@ -67,12 +67,6 @@
           "kind": "PushSecret",
           "group": "external-secrets.io",
           "version": "v1alpha1"
-        },
-        {
-          "file": "config/crds/bases/external-secrets.io_clusterpushsecrets.yaml",
-          "kind": "ClusterPushSecret",
-          "group": "external-secrets.io",
-          "version": "v1alpha1"
         }
       ]
     },
