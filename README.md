@@ -82,6 +82,12 @@ Before you begin, ensure you have the following installed on your system:
    - Login with your OpenShift credentials
    - Look for "Secrets Management" in the navigation menu
 
+### After making changes / Before creating a PR
+
+- **`make update`** – Regenerate CRD types and other generated artifacts. Run this after you change code so that `src/generated/crds` and the build stay in sync.
+- **`make sync-crd-types`** – If you added or changed imports from `./crds` or `./components/crds`, run this to have the Cursor agent or Claude CLI sync types and shims (or it will print a prompt to paste into Cursor/Claude if no CLI is installed).
+- **`make verify`** – Run typecheck, lint, and tests. Use before opening a PR.
+
 ### Available Scripts
 
 - `yarn start` - Start the plugin development server

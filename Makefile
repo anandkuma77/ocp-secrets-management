@@ -57,7 +57,7 @@ update-types: fetch-crds generate-types ## Fetch CRDs and generate TypeScript (c
 ##@ Plugin checks (TypeScript typecheck + lint; containerized, no local Node required)
 
 .PHONY: plugin-typecheck
-plugin-typecheck: require-container-runtime ## Run TypeScript type-check (catches unused vars, type errors).
+plugin-typecheck: require-container-runtime update-types ## Run TypeScript type-check (catches unused vars, type errors). Requires CRD types (update-types) first.
 	$(CONTAINER_RUNTIME) run --rm \
 		-v $(CURDIR):/app:z \
 		-w /app \
@@ -127,3 +127,38 @@ operator-test: ## Run operator tests
 .PHONY: operator-bundle
 operator-bundle: ## Generate operator bundle
 	cd operator && make bundle
+
+##@ Update & verify (run after code changes / before PR)
+
+# Short prompt for AI: follow the detailed task in the script (avoids escaping full content in make).
+SYNC_CRD_PROMPT := Follow the instructions in scripts/sync-crd-types-prompt.md in this workspace. Execute the sync task described there so CRD types and src/components/crds stay in sync with the code. Run make update-types if needed, then make plugin-typecheck to verify.
+
+.PHONY: sync-crd-types
+sync-crd-types: ## Sync CRD types and components/crds with code (uses Cursor agent or Claude CLI if available; otherwise prints prompt for manual use)
+	@cd "$(CURDIR)" && \
+	if command -v agent >/dev/null 2>&1; then \
+		echo "Running Cursor agent (sync-crd-types)..."; \
+		agent -p "$(SYNC_CRD_PROMPT)" --workspace "$(CURDIR)" || exit 1; \
+	elif command -v claude >/dev/null 2>&1; then \
+		echo "Running Claude CLI (sync-crd-types)..."; \
+		claude -p "$(SYNC_CRD_PROMPT)" --allowedTools "Read,Edit,Bash" || exit 1; \
+	else \
+		echo "=============================================="; \
+		echo "No Cursor (agent) or Claude (claude) CLI found."; \
+		echo "Paste the prompt below into Cursor Agent or Claude to sync CRD types:"; \
+		echo "=============================================="; \
+		echo ""; \
+		cat "$(CURDIR)/scripts/sync-crd-types-prompt.md"; \
+		echo ""; \
+		echo "=============================================="; \
+		echo "Then run: make update-types && make verify"; \
+		echo "=============================================="; \
+	fi
+
+.PHONY: update
+update: update-types ## Regenerate CRD types and other generated artifacts (run after making code changes)
+	@echo "✅ make update done. If you changed imports from ./crds or ./components/crds, run: make sync-crd-types"
+
+.PHONY: verify
+verify: require-container-runtime plugin-check test ## Run all checks (typecheck, lint, tests). Use before creating a PR.
+	@echo "✅ make verify passed"
