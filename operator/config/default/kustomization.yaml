@@ -1,0 +1,9 @@
+# Default kustomization: namespace, rbac, manager deployment, and CRD.
+# Used by operator-sdk generate kustomize manifests and by "kustomize build config/default".
+resources:
+  - ../namespace.yaml
+  - ../rbac/service_account.yaml
+  - ../rbac/role.yaml
+  - ../rbac/role_binding.yaml
+  - ../manager/manager.yaml
+  - ../crd/secrets-management.openshift.io_secretsmanagementconfigs.yaml

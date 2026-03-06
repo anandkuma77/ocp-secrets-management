@@ -1,0 +1,6 @@
+# Kustomization for OLM bundle manifests.
+# kustomize build config/manifests is piped to operator-sdk generate bundle.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - bases/ocp-secrets-management-operator.clusterserviceversion.yaml

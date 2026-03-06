@@ -32,6 +32,7 @@ rules:
       - secretstores
       - clustersecretstores
       - pushsecrets
+      - clusterpushsecrets
     verbs:
       - get
       - list
@@ -77,6 +78,7 @@ rules:
       - secretstores
       - clustersecretstores
       - pushsecrets
+      - clusterpushsecrets
     verbs:
       - delete
   # secrets-store-csi resources (secretproviderclasspodstatuses omitted: status subresource
@@ -118,6 +120,7 @@ rules:
       - secretstores
       - clustersecretstores
       - pushsecrets
+      - clusterpushsecrets
     verbs:
       - "*"
   # secrets-store-csi resources

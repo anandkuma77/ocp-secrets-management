@@ -274,6 +274,9 @@ function generateModels(sources: ManifestSource[]): string {
 
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 
+/** Model shape with version/group for use with useK8sWatchResource (K8sGroupVersionKind). */
+type WatchableModel = K8sModel & { version: string; group: string };
+
 `;
 
   for (const source of sources) {
@@ -288,7 +291,7 @@ import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
   output += `/**
  * All models by kind for convenience
  */
-export const Models: Record<string, K8sModel> = {\n`;
+export const Models: Record<string, WatchableModel> = {\n`;
   for (const source of sources) {
     for (const crd of source.crds) {
       const crdPath = path.join(ROOT_DIR, crd.localPath);
@@ -312,6 +315,8 @@ export const Models: Record<string, K8sModel> = {\n`;
       output += `    abbr: '${abbr}',\n`;
       output += `    apiVersion: '${crd.version}',\n`;
       output += `    apiGroup: '${crd.group}',\n`;
+      output += `    version: '${crd.version}',\n`;
+      output += `    group: '${crd.group}',\n`;
       output += `    kind: '${crd.kind}',\n`;
       output += `    label: '${label}',\n`;
       output += `    labelPlural: '${labelPlural}',\n`;

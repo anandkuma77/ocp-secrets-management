@@ -82,6 +82,7 @@ rules:
   - external-secrets.io
   resources:
   - clusterexternalsecrets
+  - clusterpushsecrets
   - clustersecretstores
   - externalsecrets
   - pushsecrets
