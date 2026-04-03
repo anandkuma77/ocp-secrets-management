@@ -1,0 +1,10 @@
+# Kustomization for the operator deployment.
+# "make bundle" runs: kustomize edit set image controller=$(IMG)
+resources:
+- manager.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: controller
+  newName: openshift.io/ocp-secrets-management-operator
+  newTag: latest

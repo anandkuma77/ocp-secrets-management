@@ -73,7 +73,7 @@ type SecretsManagementConfigReconciler struct {
 // +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
 // Permissions for cert-manager / external-secrets / secrets-store-csi so the operator can create ClusterRoles that grant these to the plugin (RBAC escalation rule; use * so we can grant * to admin role)
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates;issuers;clusterissuers,verbs=*
-// +kubebuilder:rbac:groups=external-secrets.io,resources=externalsecrets;secretstores;clustersecretstores;clusterexternalsecrets;pushsecrets,verbs=*
+// +kubebuilder:rbac:groups=external-secrets.io,resources=externalsecrets;secretstores;clustersecretstores;clusterexternalsecrets;pushsecrets;clusterpushsecrets,verbs=*
 // +kubebuilder:rbac:groups=secrets-store.csi.x-k8s.io,resources=secretproviderclasses;secretproviderclasspodstatuses,verbs=*
 // +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups=coordination.k8s.io,resources=leases,verbs=get;list;watch;create;update;patch;delete

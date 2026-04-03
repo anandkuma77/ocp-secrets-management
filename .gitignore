@@ -16,3 +16,4 @@ crds/
 # Exclude generated files
 operator/bin
 operator/cover.out
+bin

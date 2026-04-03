@@ -15,7 +15,23 @@ VERSION ?= 0.1.0
 # Tool versions
 CONTROLLER_GEN_VERSION ?= v0.14.0
 KUSTOMIZE_VERSION ?= v5.3.0
-OPERATOR_SDK_VERSION ?= v1.34.0
+# v1.34.0 has no release assets (404); use v1.34.1 or later for curl download.
+OPERATOR_SDK_VERSION ?= v1.34.1
+
+# Location to install dependencies to (for operator-sdk; controller-gen/kustomize use GOBIN).
+LOCALBIN ?= ../bin
+
+# Bundle channels and default channel (override via CHANNELS= or DEFAULT_CHANNEL= when running make bundle).
+# See https://github.com/openshift/external-secrets-operator/blob/main/Makefile
+BUNDLE_CHANNELS ?=
+ifneq ($(origin CHANNELS), undefined)
+BUNDLE_CHANNELS := --channels=$(CHANNELS)
+endif
+BUNDLE_DEFAULT_CHANNEL ?=
+ifneq ($(origin DEFAULT_CHANNEL), undefined)
+BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
+endif
+BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -150,12 +166,40 @@ KUSTOMIZE = $(GOBIN)/kustomize
 kustomize: ## Download kustomize locally if necessary.
 	@test -s $(KUSTOMIZE) || GOBIN=$(GOBIN) go install sigs.k8s.io/kustomize/kustomize/v5@$(KUSTOMIZE_VERSION)
 
+# OPERATOR_SDK: use LOCALBIN/operator-sdk by default; download target below installs it if missing. Override with OPERATOR_SDK=operator-sdk to use system binary.
+OPERATOR_SDK ?= $(LOCALBIN)/operator-sdk
+$(OPERATOR_SDK): ## Download operator-sdk locally if necessary.
+ifeq (,$(wildcard $(OPERATOR_SDK)))
+ifeq (,$(shell which operator-sdk 2>/dev/null))
+	@{ \
+	set -e; \
+	mkdir -p $(dir $(OPERATOR_SDK)); \
+	OS=$$(go env GOOS) && ARCH=$$(go env GOARCH) && \
+	curl -sSLo $(OPERATOR_SDK) "https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH}"; \
+	if ! [ -s $(OPERATOR_SDK) ] || head -c 20 $(OPERATOR_SDK) | grep -q 'Not Found'; then \
+	  echo "operator-sdk download failed (empty or 404). Try OPERATOR_SDK_VERSION=v1.34.1 or install from https://sdk.operatorframework.io/docs/installation/"; \
+	  rm -f $(OPERATOR_SDK); exit 1; \
+	fi; \
+	chmod +x $(OPERATOR_SDK); \
+	}
+else
+OPERATOR_SDK := $(shell which operator-sdk)
+endif
+endif
+
+# Flags for operator-sdk generate bundle (align with openshift/external-secrets-operator: -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS))
+BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+
 ##@ Bundle
 
 .PHONY: bundle
-bundle: manifests ## Generate bundle manifests and metadata.
-	cp config/crd/secrets-management.openshift.io_secretsmanagementconfigs.yaml bundle/manifests/
-	@echo "Bundle generated in bundle/"
+bundle: $(KUSTOMIZE) $(OPERATOR_SDK) manifests ## Generate bundle manifests and metadata, then validate generated files.
+	@echo "Generating the bundle manifests and metadata..."
+	@$(OPERATOR_SDK) generate kustomize manifests -q
+	@cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	@$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
+	@go run ./scripts/patch-bundle-csv.go
+	@$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image (default: podman).
@@ -166,8 +210,8 @@ bundle-push: ## Push the bundle image (default: podman).
 	$(CONTAINER_ENGINE) push $(BUNDLE_IMG)
 
 .PHONY: bundle-validate
-bundle-validate: ## Validate the bundle using operator-sdk.
-	operator-sdk bundle validate ./bundle
+bundle-validate: $(OPERATOR_SDK) ## Validate the bundle using operator-sdk.
+	$(OPERATOR_SDK) bundle validate ./bundle
 
 .PHONY: catalog-build
 catalog-build: ## Build a catalog image.
