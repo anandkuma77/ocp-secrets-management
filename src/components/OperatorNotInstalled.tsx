@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import {
   EmptyState,
   EmptyStateBody,
@@ -22,15 +22,15 @@ interface OperatorNotInstalledProps {
 
 export const OperatorNotInstalled: React.FC<OperatorNotInstalledProps> = ({ operatorKey }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
-  const history = useHistory();
+  const navigate = useNavigate();
   const info = OPERATOR_INFO[operatorKey];
 
   const handleNavigateToOperatorHub = () => {
-    history.push(info.operatorHubUrl);
+    navigate(info.operatorHubUrl);
   };
 
   const handleOpenQuickStart = () => {
-    history.push(info.quickStartUrl);
+    navigate(info.quickStartUrl);
   };
 
   return (
@@ -68,7 +68,7 @@ const OPERATOR_KEYS: OperatorKey[] = ['cert-manager', 'external-secrets', 'secre
  */
 export const NoOperatorsInstalled: React.FC = () => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <EmptyState variant={EmptyStateVariant.lg} icon={CubesIcon}>
@@ -94,7 +94,7 @@ export const NoOperatorsInstalled: React.FC = () => {
                   variant="link"
                   isInline
                   icon={<ExternalLinkAltIcon />}
-                  onClick={() => history.push(info.quickStartUrl)}
+                  onClick={() => navigate(info.quickStartUrl)}
                   style={{ padding: '4px 0' }}
                 >
                   {t('Open Quick Start')}
@@ -110,10 +110,10 @@ export const NoOperatorsInstalled: React.FC = () => {
         </Content>
       </EmptyStateBody>
       <EmptyStateActions>
-        <Button variant="primary" onClick={() => history.push('/quickstart')}>
+        <Button variant="primary" onClick={() => navigate('/quickstart')}>
           {t('Open Quick Starts')}
         </Button>
-        <Button variant="secondary" onClick={() => history.push('/catalog/ns/default')}>
+        <Button variant="secondary" onClick={() => navigate('/catalog/ns/default')}>
           {t('Go to Catalog')}
         </Button>
       </EmptyStateActions>

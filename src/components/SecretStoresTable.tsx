@@ -9,11 +9,6 @@ import {
   DropdownList,
   MenuToggle,
   MenuToggleElement,
-  Modal,
-  ModalVariant,
-  Button,
-  Alert,
-  AlertVariant,
 } from '@patternfly/react-core';
 import {
   CheckCircleIcon,
@@ -22,6 +17,7 @@ import {
   EllipsisVIcon,
 } from '@patternfly/react-icons';
 import { ResourceTable } from './ResourceTable';
+import { DeleteConfirmationModal } from './DeleteConfirmationModal';
 import { useK8sWatchResource, consoleFetch } from '@openshift-console/dynamic-plugin-sdk';
 import { SecretStoreModel, ClusterSecretStoreModel, SecretStore } from './crds';
 
@@ -301,66 +297,15 @@ export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedPr
         data-test="secret-stores-table"
       />
 
-      <Modal
-        variant={ModalVariant.small}
-        title={
-          deleteModal.secretStore && isClusterScopedStore(deleteModal.secretStore)
-            ? `${t('Delete')} ${t('ClusterSecretStore')}`
-            : `${t('Delete')} ${t('SecretStore')}`
-        }
+      <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
-        onClose={cancelDelete}
-      >
-        <div style={{ padding: '1.5rem' }}>
-          {deleteModal.error && (
-            <Alert
-              variant={AlertVariant.danger}
-              title={t('Delete failed')}
-              isInline
-              style={{ marginBottom: '1.5rem' }}
-            >
-              {deleteModal.error}
-            </Alert>
-          )}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <p style={{ marginBottom: '1rem', fontSize: '1rem', lineHeight: '1.5' }}>
-              {deleteModal.secretStore && isClusterScopedStore(deleteModal.secretStore)
-                ? `${t('Are you sure you want to delete the ClusterSecretStore')} "${
-                    deleteModal.secretStore.metadata?.name
-                  }"?`
-                : `${t('Are you sure you want to delete the SecretStore')} "${
-                    deleteModal.secretStore?.metadata?.name
-                  }"?`}
-            </p>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#6a737d' }}>
-              <strong>{t('This action cannot be undone.')}</strong>
-            </p>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '0.75rem',
-              paddingTop: '1rem',
-              borderTop: '1px solid #e1e5e9',
-            }}
-          >
-            <Button key="cancel" variant="link" onClick={cancelDelete}>
-              {t('Cancel')}
-            </Button>
-            <Button
-              key="confirm"
-              variant="danger"
-              onClick={confirmDelete}
-              isDisabled={deleteModal.isDeleting}
-              isLoading={deleteModal.isDeleting}
-              spinnerAriaValueText={deleteModal.isDeleting ? t('Deleting...') : undefined}
-            >
-              {deleteModal.isDeleting ? t('Deleting...') : t('Delete')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        resourceName={deleteModal.secretStore?.metadata?.name || ''}
+        resourceType={deleteModal.secretStore?.scope === 'Cluster' ? t('ClusterSecretStore') : t('SecretStore')}
+        isDeleting={deleteModal.isDeleting}
+        error={deleteModal.error}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </>
   );
 };
