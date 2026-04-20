@@ -13,6 +13,7 @@ import {
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
+  ExclamationTriangleIcon,
   TimesCircleIcon,
   EllipsisVIcon,
 } from '@patternfly/react-icons';
@@ -66,6 +67,40 @@ const getSecretProviderClassStatus = (
   // If there are pod statuses but none are mounted
   return { status: 'Not Ready', icon: <TimesCircleIcon />, color: 'red' };
 };
+
+function getExpiryLabel(
+  dateStr: string | undefined,
+  t: (key: string, opts?: object) => string,
+): { text: string; color: LabelProps['color']; icon: React.ReactElement } | null {
+  if (!dateStr || dateStr === '-') return null;
+  const expiry = new Date(dateStr).getTime();
+  if (Number.isNaN(expiry)) return null;
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const diffDays = (expiry - Date.now()) / msPerDay;
+  const days = diffDays >= 0 ? Math.floor(diffDays) : Math.ceil(diffDays);
+
+  if (diffDays < 0) {
+    const text =
+      days === 0 || days === -1
+        ? t('Expired')
+        : t('Expired {{count}} days ago', { count: -days });
+    return { text, color: 'red', icon: <ExclamationCircleIcon /> };
+  }
+  if (days <= 2) {
+    let text: string;
+    if (days === 0) {
+      const hours = Math.floor(diffDays * 24);
+      text = hours > 0 ? t('Expires in {{count}} hours', { count: hours }) : t('Expires today');
+    } else {
+      text = t('{{count}} days remaining', { count: days });
+    }
+    return { text, color: 'red', icon: <ExclamationCircleIcon /> };
+  }
+  if (days <= 30) {
+    return { text: t('{{count}} days remaining', { count: days }), color: 'yellow', icon: <ExclamationTriangleIcon /> };
+  }
+  return { text: t('{{count}} days remaining', { count: days }), color: 'green', icon: <CheckCircleIcon /> };
+}
 
 interface SecretProviderClassTableProps {
   selectedProject: string;
@@ -185,10 +220,10 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
         parameterKeys.length > 0
           ? `${parameterKeys.length} parameter${parameterKeys.length > 1 ? 's' : ''}`
           : 'None';
-      const expiryDate =
+      const rawExpiry =
         spc.metadata.annotations?.['expiry-date'] ??
-        spc.metadata.annotations?.['expiryDate'] ??
-        '-';
+        spc.metadata.annotations?.['expiryDate'];
+      const expiryInfo = getExpiryLabel(rawExpiry, t);
 
       return {
         cells: [
@@ -199,7 +234,13 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
           </span>,
           secretObjectsText,
           parametersText,
-          expiryDate,
+          expiryInfo ? (
+            <Label key={`expiry-${spcId}`} color={expiryInfo.color} icon={expiryInfo.icon}>
+              {expiryInfo.text}
+            </Label>
+          ) : (
+            '-'
+          ),
           <Label
             key={`status-${spcId}`}
             color={conditionStatus.color as LabelProps['color']}
