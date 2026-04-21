@@ -29,11 +29,11 @@ import { ExternalSecretsTable } from './components/ExternalSecretsTable';
 import { SecretStoresTable } from './components/SecretStoresTable';
 import { PushSecretsTable } from './components/PushSecretsTable';
 import { SecretProviderClassTable } from './components/SecretProviderClassTable';
-import { OperatorNotInstalled, NoOperatorsInstalled } from './components/OperatorNotInstalled';
+import { NoOperatorsInstalled } from './components/OperatorNotInstalled';
 import { useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
 import { useOperatorDetection, type OperatorStatus } from './hooks/useOperatorDetection';
 
-/** Badge for operator status: shows "Check failed" with tooltip on error, "Not Installed" when not installed, or nothing when installed. */
+/** Badge shown on card titles when operator detection encountered an error. */
 const OperatorStatusBadge: React.FC<{ status: OperatorStatus }> = ({ status }) => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
   if (status.error) {
@@ -46,16 +46,6 @@ const OperatorStatusBadge: React.FC<{ status: OperatorStatus }> = ({ status }) =
           {t('Check failed')}
         </Badge>
       </Tooltip>
-    );
-  }
-  if (!status.installed) {
-    return (
-      <Badge
-        isRead
-        style={{ marginLeft: '8px', backgroundColor: 'var(--pf-global--warning-color--100)' }}
-      >
-        {t('Not Installed')}
-      </Badge>
     );
   }
   return null;
@@ -122,7 +112,32 @@ export default function SecretsManagement() {
     refresh: checkOperators,
   } = useOperatorDetection();
 
-  // Check if any operators are installed
+  const isOperatorInstalled = (operator: OperatorType): boolean => {
+    switch (operator) {
+      case 'cert-manager':
+        return certManager.installed;
+      case 'external-secrets':
+        return externalSecrets.installed;
+      case 'secrets-store-csi':
+        return secretsStoreCSI.installed;
+      default:
+        return true;
+    }
+  };
+
+  const getOperatorStatus = (
+    operatorKey: 'cert-manager' | 'external-secrets' | 'secrets-store-csi',
+  ) => {
+    switch (operatorKey) {
+      case 'cert-manager':
+        return certManager;
+      case 'external-secrets':
+        return externalSecrets;
+      case 'secrets-store-csi':
+        return secretsStoreCSI;
+    }
+  };
+
   const anyOperatorInstalled =
     certManager.installed || externalSecrets.installed || secretsStoreCSI.installed;
 
@@ -132,12 +147,7 @@ export default function SecretsManagement() {
     isList: true,
   });
 
-  const operatorOptions = [
-    {
-      value: 'all',
-      label: t('All Operators'),
-      description: t('Show resources from all operators'),
-    },
+  const allOperatorEntries: { value: OperatorType; label: string; description: string }[] = [
     {
       value: 'cert-manager',
       label: 'cert-manager',
@@ -153,6 +163,15 @@ export default function SecretsManagement() {
       label: 'Secrets Store CSI Driver',
       description: t('Secret provider integration'),
     },
+  ];
+
+  const operatorOptions = [
+    {
+      value: 'all' as OperatorType,
+      label: t('All Operators'),
+      description: t('Show resources from all operators'),
+    },
+    ...allOperatorEntries.filter((entry) => isOperatorInstalled(entry.value)),
   ];
 
   // Generate dynamic project options from fetched namespaces
@@ -216,6 +235,37 @@ export default function SecretsManagement() {
 
   const projectOptions = getProjectOptions;
 
+  const certManagerResources = [
+    { value: 'certificates', label: t('Certificates'), description: t('TLS certificates') },
+    { value: 'issuers', label: t('Issuers'), description: t('Certificate issuers') },
+  ];
+
+  const externalSecretsResources = [
+    {
+      value: 'externalsecrets',
+      label: t('External Secrets'),
+      description: t('Secret synchronization rules'),
+    },
+    {
+      value: 'secretstores',
+      label: t('Secret Stores'),
+      description: t('External secret backends'),
+    },
+    {
+      value: 'pushsecrets',
+      label: t('Push Secrets'),
+      description: t('Secret push configurations'),
+    },
+  ];
+
+  const secretsStoreCSIResources = [
+    {
+      value: 'secretproviderclasses',
+      label: t('Secret Provider Classes'),
+      description: t('Secret provider configurations'),
+    },
+  ];
+
   const getResourceOptions = (operator: OperatorType) => {
     const baseOptions = [
       { value: 'all', label: t('All Resources'), description: t('Show all resource types') },
@@ -224,67 +274,16 @@ export default function SecretsManagement() {
     if (operator === 'all') {
       return [
         ...baseOptions,
-        {
-          value: 'certificates',
-          label: t('Certificates'),
-          description: t('cert-manager certificates'),
-        },
-        { value: 'issuers', label: t('Issuers'), description: t('cert-manager issuers') },
-        {
-          value: 'externalsecrets',
-          label: t('External Secrets'),
-          description: t('External secret definitions'),
-        },
-        {
-          value: 'secretstores',
-          label: t('Secret Stores'),
-          description: t('External secret stores'),
-        },
-        {
-          value: 'pushsecrets',
-          label: t('Push Secrets'),
-          description: t('External secret push configurations'),
-        },
-        {
-          value: 'secretproviderclasses',
-          label: t('Secret Provider Classes'),
-          description: t('CSI secret provider configurations'),
-        },
+        ...(certManager.installed ? certManagerResources : []),
+        ...(externalSecrets.installed ? externalSecretsResources : []),
+        ...(secretsStoreCSI.installed ? secretsStoreCSIResources : []),
       ];
     } else if (operator === 'cert-manager') {
-      return [
-        ...baseOptions,
-        { value: 'certificates', label: t('Certificates'), description: t('TLS certificates') },
-        { value: 'issuers', label: t('Issuers'), description: t('Certificate issuers') },
-      ];
+      return [...baseOptions, ...certManagerResources];
     } else if (operator === 'external-secrets') {
-      return [
-        ...baseOptions,
-        {
-          value: 'externalsecrets',
-          label: t('External Secrets'),
-          description: t('Secret synchronization rules'),
-        },
-        {
-          value: 'secretstores',
-          label: t('Secret Stores'),
-          description: t('External secret backends'),
-        },
-        {
-          value: 'pushsecrets',
-          label: t('Push Secrets'),
-          description: t('Secret push configurations'),
-        },
-      ];
+      return [...baseOptions, ...externalSecretsResources];
     } else if (operator === 'secrets-store-csi') {
-      return [
-        ...baseOptions,
-        {
-          value: 'secretproviderclasses',
-          label: t('Secret Provider Classes'),
-          description: t('Secret provider configurations'),
-        },
-      ];
+      return [...baseOptions, ...secretsStoreCSIResources];
     }
     return baseOptions;
   };
@@ -312,43 +311,13 @@ export default function SecretsManagement() {
   };
 
   const shouldShowComponent = (operator: OperatorType, resourceKind: ResourceKind) => {
+    if (!isOperatorInstalled(operator)) return false;
     if (filters.operator !== 'all' && filters.operator !== operator) return false;
     if (filters.resourceKind !== 'all' && filters.resourceKind !== resourceKind) return false;
     return true;
   };
 
-  // Check if operator is installed for the card content
-  const isOperatorInstalled = (operator: OperatorType): boolean => {
-    switch (operator) {
-      case 'cert-manager':
-        return certManager.installed;
-      case 'external-secrets':
-        return externalSecrets.installed;
-      case 'secrets-store-csi':
-        return secretsStoreCSI.installed;
-      default:
-        return true;
-    }
-  };
-
-  // Get operator status for error/lookup-failure handling
-  const getOperatorStatus = (
-    operatorKey: 'cert-manager' | 'external-secrets' | 'secrets-store-csi',
-  ) => {
-    switch (operatorKey) {
-      case 'cert-manager':
-        return certManager;
-      case 'external-secrets':
-        return externalSecrets;
-      case 'secrets-store-csi':
-        return secretsStoreCSI;
-    }
-  };
-
-  // Render the appropriate content based on operator installation status
-  // Uses a render function to lazily evaluate the table component
   const renderOperatorContent = (
-    operator: OperatorType,
     renderInstalledContent: () => React.ReactNode,
     operatorKey: 'cert-manager' | 'external-secrets' | 'secrets-store-csi',
   ) => {
@@ -372,11 +341,6 @@ export default function SecretsManagement() {
       );
     }
 
-    if (!isOperatorInstalled(operator)) {
-      return <OperatorNotInstalled operatorKey={operatorKey} />;
-    }
-
-    // Only call the render function when operator is confirmed installed
     return renderInstalledContent();
   };
 
@@ -547,23 +511,14 @@ export default function SecretsManagement() {
         </div>
 
         <div className="co-m-pane__body-group">
-          {/* Show loading state while checking operators */}
           {operatorsLoading && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
               <Spinner size="xl" />
             </div>
           )}
 
-          {/* Show message if no operators are installed */}
-          {!operatorsLoading && !anyOperatorInstalled && (
-            <Card>
-              <CardBody>
-                <NoOperatorsInstalled />
-              </CardBody>
-            </Card>
-          )}
+          {!operatorsLoading && !anyOperatorInstalled && <NoOperatorsInstalled />}
 
-          {/* Show operator sections - only when at least one operator is installed */}
           {!operatorsLoading && anyOperatorInstalled && (
             <Grid hasGutter>
               {/* cert-manager Resources */}
@@ -583,7 +538,6 @@ export default function SecretsManagement() {
                     </CardTitle>
                     <CardBody>
                       {renderOperatorContent(
-                        'cert-manager',
                         () => (
                           <CertificatesTable selectedProject={filters.project} />
                         ),
@@ -610,7 +564,6 @@ export default function SecretsManagement() {
                     </CardTitle>
                     <CardBody>
                       {renderOperatorContent(
-                        'cert-manager',
                         () => (
                           <IssuersTable selectedProject={filters.project} />
                         ),
@@ -638,7 +591,6 @@ export default function SecretsManagement() {
                     </CardTitle>
                     <CardBody>
                       {renderOperatorContent(
-                        'external-secrets',
                         () => (
                           <ExternalSecretsTable selectedProject={filters.project} />
                         ),
@@ -665,7 +617,6 @@ export default function SecretsManagement() {
                     </CardTitle>
                     <CardBody>
                       {renderOperatorContent(
-                        'external-secrets',
                         () => (
                           <SecretStoresTable selectedProject={filters.project} />
                         ),
@@ -692,7 +643,6 @@ export default function SecretsManagement() {
                     </CardTitle>
                     <CardBody>
                       {renderOperatorContent(
-                        'external-secrets',
                         () => (
                           <PushSecretsTable selectedProject={filters.project} />
                         ),
@@ -720,7 +670,6 @@ export default function SecretsManagement() {
                     </CardTitle>
                     <CardBody>
                       {renderOperatorContent(
-                        'secrets-store-csi',
                         () => (
                           <SecretProviderClassTable selectedProject={filters.project} />
                         ),

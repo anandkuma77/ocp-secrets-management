@@ -32,4 +32,3 @@ export interface Certificate {
     notAfter?: string;
   };
 }
-

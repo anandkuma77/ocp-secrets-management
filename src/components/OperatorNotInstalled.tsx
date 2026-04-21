@@ -9,111 +9,33 @@ import {
   Button,
   Content,
   ContentVariants,
-  List,
-  ListItem,
   Title,
 } from '@patternfly/react-core';
-import { CubesIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
-import { OPERATOR_INFO, OperatorKey } from '../hooks/useOperatorDetection';
-
-interface OperatorNotInstalledProps {
-  operatorKey: OperatorKey;
-}
-
-export const OperatorNotInstalled: React.FC<OperatorNotInstalledProps> = ({ operatorKey }) => {
-  const { t } = useTranslation('plugin__ocp-secrets-management');
-  const navigate = useNavigate();
-  const info = OPERATOR_INFO[operatorKey];
-
-  const handleNavigateToOperatorHub = () => {
-    navigate(info.operatorHubUrl);
-  };
-
-  const handleOpenQuickStart = () => {
-    navigate(info.quickStartUrl);
-  };
-
-  return (
-    <EmptyState variant={EmptyStateVariant.lg} icon={CubesIcon}>
-      <Title headingLevel="h4" size="lg">
-        {t('{{operatorName}} is not installed', { operatorName: info.displayName })}
-      </Title>
-      <EmptyStateBody>
-        <Content component={ContentVariants.p}>{info.description}</Content>
-        <Content component={ContentVariants.p}>
-          {t('To use this feature, install the operator by following these steps:')}
-        </Content>
-        <List>
-          {info.installInstructions.map((instruction, index) => (
-            <ListItem key={index}>{t(instruction)}</ListItem>
-          ))}
-        </List>
-      </EmptyStateBody>
-      <EmptyStateActions>
-        <Button variant="primary" onClick={handleNavigateToOperatorHub}>
-          {t('Go to Catalog')}
-        </Button>
-        <Button variant="link" onClick={handleOpenQuickStart} icon={<ExternalLinkAltIcon />}>
-          {t('Open Quick Start')}
-        </Button>
-      </EmptyStateActions>
-    </EmptyState>
-  );
-};
-
-const OPERATOR_KEYS: OperatorKey[] = ['cert-manager', 'external-secrets', 'secrets-store-csi'];
+import { CubesIcon } from '@patternfly/react-icons';
 
 /**
- * Component to show when all operators are not installed
+ * Minimal empty state shown when no supported operators are detected at all.
+ * Avoids taking up large screen real estate or prominently suggesting installs
+ * — the admin may have intentionally chosen an alternate solution.
  */
 export const NoOperatorsInstalled: React.FC = () => {
   const { t } = useTranslation('plugin__ocp-secrets-management');
   const navigate = useNavigate();
 
   return (
-    <EmptyState variant={EmptyStateVariant.lg} icon={CubesIcon}>
-      <Title headingLevel="h4" size="lg">
-        {t('No secrets operators installed')}
+    <EmptyState variant={EmptyStateVariant.sm} icon={CubesIcon}>
+      <Title headingLevel="h4" size="md">
+        {t('No supported secrets operators detected')}
       </Title>
       <EmptyStateBody>
         <Content component={ContentVariants.p}>
           {t(
-            'This plugin provides a unified interface to manage secrets across your OpenShift cluster. To get started, install at least one of the following operators:',
-          )}
-        </Content>
-        <List style={{ textAlign: 'left', maxWidth: '800px', margin: '16px auto' }}>
-          {OPERATOR_KEYS.map((key) => {
-            const info = OPERATOR_INFO[key];
-            return (
-              <ListItem key={key} style={{ marginBottom: '12px' }}>
-                <strong>{info.displayName}</strong>
-                <br />
-                <span style={{ color: '#6a6e73' }}>{t(info.description)}</span>
-                <br />
-                <Button
-                  variant="link"
-                  isInline
-                  icon={<ExternalLinkAltIcon />}
-                  onClick={() => navigate(info.quickStartUrl)}
-                  style={{ padding: '4px 0' }}
-                >
-                  {t('Open Quick Start')}
-                </Button>
-              </ListItem>
-            );
-          })}
-        </List>
-        <Content component={ContentVariants.p}>
-          {t(
-            'Open Quick Starts from the Help menu (?) for guided setup, or go to Catalog to install operators.',
+            'Install a supported operator (cert-manager, External Secrets Operator, or Secrets Store CSI Driver) to manage secrets from this page.',
           )}
         </Content>
       </EmptyStateBody>
       <EmptyStateActions>
-        <Button variant="primary" onClick={() => navigate('/quickstart')}>
-          {t('Open Quick Starts')}
-        </Button>
-        <Button variant="secondary" onClick={() => navigate('/catalog/ns/default')}>
+        <Button variant="link" onClick={() => navigate('/catalog/ns/default')}>
           {t('Go to Catalog')}
         </Button>
       </EmptyStateActions>

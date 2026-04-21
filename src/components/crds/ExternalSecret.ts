@@ -94,7 +94,8 @@ export interface ClusterExternalSecret {
 
 export type ExternalSecretResource = ExternalSecret | ClusterExternalSecret;
 
-export const isClusterExternalSecret = (resource: ExternalSecretResource): resource is ClusterExternalSecret => {
+export const isClusterExternalSecret = (
+  resource: ExternalSecretResource,
+): resource is ClusterExternalSecret => {
   return 'externalSecretSpec' in resource.spec;
 };
-

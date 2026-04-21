@@ -349,7 +349,11 @@ export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ sele
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
         resourceName={deleteModal.externalSecret?.metadata?.name || ''}
-        resourceType={deleteModal.externalSecret && isClusterExternalSecret(deleteModal.externalSecret) ? t('ClusterExternalSecret') : t('ExternalSecret')}
+        resourceType={
+          deleteModal.externalSecret && isClusterExternalSecret(deleteModal.externalSecret)
+            ? t('ClusterExternalSecret')
+            : t('ExternalSecret')
+        }
         isDeleting={deleteModal.isDeleting}
         error={deleteModal.error}
         onConfirm={confirmDelete}

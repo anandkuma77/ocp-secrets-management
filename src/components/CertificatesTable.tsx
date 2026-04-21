@@ -51,9 +51,7 @@ function getExpiryLabel(
 
   if (diffDays < 0) {
     const text =
-      days === 0 || days === -1
-        ? t('Expired')
-        : t('Expired {{count}} days ago', { count: -days });
+      days === 0 || days === -1 ? t('Expired') : t('Expired {{count}} days ago', { count: -days });
     return { text, color: 'red', icon: <ExclamationCircleIcon /> };
   }
   if (days <= 2) {
@@ -67,9 +65,17 @@ function getExpiryLabel(
     return { text, color: 'red', icon: <ExclamationCircleIcon /> };
   }
   if (days <= 30) {
-    return { text: t('{{count}} days remaining', { count: days }), color: 'yellow', icon: <ExclamationTriangleIcon /> };
+    return {
+      text: t('{{count}} days remaining', { count: days }),
+      color: 'yellow',
+      icon: <ExclamationTriangleIcon />,
+    };
   }
-  return { text: t('{{count}} days remaining', { count: days }), color: 'green', icon: <CheckCircleIcon /> };
+  return {
+    text: t('{{count}} days remaining', { count: days }),
+    color: 'green',
+    icon: <CheckCircleIcon />,
+  };
 }
 
 interface CertificatesTableProps {

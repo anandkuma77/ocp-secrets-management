@@ -58,4 +58,3 @@ export interface SecretProviderClassPodStatus {
     targetPath?: string;
   };
 }
-
