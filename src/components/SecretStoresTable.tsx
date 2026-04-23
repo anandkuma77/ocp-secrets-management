@@ -300,7 +300,9 @@ export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedPr
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
         resourceName={deleteModal.secretStore?.metadata?.name || ''}
-        resourceType={deleteModal.secretStore?.scope === 'Cluster' ? t('ClusterSecretStore') : t('SecretStore')}
+        resourceType={
+          deleteModal.secretStore?.scope === 'Cluster' ? t('ClusterSecretStore') : t('SecretStore')
+        }
         isDeleting={deleteModal.isDeleting}
         error={deleteModal.error}
         onConfirm={confirmDelete}

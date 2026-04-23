@@ -242,11 +242,10 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
     });
   }, [pushSecrets, clusterPushSecrets, loaded, openDropdowns, t]);
 
-  // Handle case where PushSecret CRDs might not be installed
   const getErrorMessage = () => {
     if (loadError?.message?.includes('no matches for kind')) {
       return t(
-        'PushSecret resources are not available. Please ensure External Secrets Operator v0.9.0+ is installed with PushSecret CRDs.',
+        'PushSecret CRDs are not available. This feature requires External Secrets Operator v0.9.0 or later.',
       );
     }
     return loadError?.message;
@@ -274,7 +273,11 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
       <DeleteConfirmationModal
         isOpen={deleteModal.isOpen}
         resourceName={deleteModal.pushSecret?.metadata?.name || ''}
-        resourceType={deleteModal.pushSecret && isClusterPushSecret(deleteModal.pushSecret) ? t('ClusterPushSecret') : t('PushSecret')}
+        resourceType={
+          deleteModal.pushSecret && isClusterPushSecret(deleteModal.pushSecret)
+            ? t('ClusterPushSecret')
+            : t('PushSecret')
+        }
         isDeleting={deleteModal.isDeleting}
         error={deleteModal.error}
         onConfirm={() => deleteModal.pushSecret && handleDelete(deleteModal.pushSecret)}

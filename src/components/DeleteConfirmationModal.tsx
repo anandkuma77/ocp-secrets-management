@@ -76,7 +76,12 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
         <div style={{ marginBottom: '1.5rem' }}>
           <label
             htmlFor="delete-confirmation-input"
-            style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}
+            style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+            }}
           >
             {t('Please type {{resourceName}} to confirm.', { resourceName })}
           </label>

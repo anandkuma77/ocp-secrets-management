@@ -81,9 +81,7 @@ function getExpiryLabel(
 
   if (diffDays < 0) {
     const text =
-      days === 0 || days === -1
-        ? t('Expired')
-        : t('Expired {{count}} days ago', { count: -days });
+      days === 0 || days === -1 ? t('Expired') : t('Expired {{count}} days ago', { count: -days });
     return { text, color: 'red', icon: <ExclamationCircleIcon /> };
   }
   if (days <= 2) {
@@ -97,9 +95,17 @@ function getExpiryLabel(
     return { text, color: 'red', icon: <ExclamationCircleIcon /> };
   }
   if (days <= 30) {
-    return { text: t('{{count}} days remaining', { count: days }), color: 'yellow', icon: <ExclamationTriangleIcon /> };
+    return {
+      text: t('{{count}} days remaining', { count: days }),
+      color: 'yellow',
+      icon: <ExclamationTriangleIcon />,
+    };
   }
-  return { text: t('{{count}} days remaining', { count: days }), color: 'green', icon: <CheckCircleIcon /> };
+  return {
+    text: t('{{count}} days remaining', { count: days }),
+    color: 'green',
+    icon: <CheckCircleIcon />,
+  };
 }
 
 interface SecretProviderClassTableProps {
@@ -221,8 +227,7 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
           ? `${parameterKeys.length} parameter${parameterKeys.length > 1 ? 's' : ''}`
           : 'None';
       const rawExpiry =
-        spc.metadata.annotations?.['expiry-date'] ??
-        spc.metadata.annotations?.['expiryDate'];
+        spc.metadata.annotations?.['expiry-date'] ?? spc.metadata.annotations?.['expiryDate'];
       const expiryInfo = getExpiryLabel(rawExpiry, t);
 
       return {
@@ -310,7 +315,9 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
         resourceType={t('SecretProviderClass')}
         isDeleting={deleteModal.isDeleting}
         error={deleteModal.error}
-        onConfirm={() => deleteModal.secretProviderClass && handleDelete(deleteModal.secretProviderClass)}
+        onConfirm={() =>
+          deleteModal.secretProviderClass && handleDelete(deleteModal.secretProviderClass)
+        }
         onCancel={closeDeleteModal}
       />
     </>

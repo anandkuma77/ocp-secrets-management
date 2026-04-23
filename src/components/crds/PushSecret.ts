@@ -103,7 +103,8 @@ export interface ClusterPushSecret {
 
 export type PushSecretResource = PushSecret | ClusterPushSecret;
 
-export const isClusterPushSecret = (resource: PushSecretResource): resource is ClusterPushSecret => {
+export const isClusterPushSecret = (
+  resource: PushSecretResource,
+): resource is ClusterPushSecret => {
   return !resource.metadata.namespace;
 };
-
