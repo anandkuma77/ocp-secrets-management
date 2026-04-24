@@ -264,9 +264,8 @@ export const SecretProviderClassTable: React.FC<SecretProviderClassTableProps> =
                 variant="plain"
                 onClick={() => toggleDropdown(spcId)}
                 isExpanded={openDropdowns[spcId] || false}
-              >
-                <EllipsisVIcon />
-              </MenuToggle>
+                icon={<EllipsisVIcon />}
+              />
             )}
             shouldFocusToggleOnSelect
           >

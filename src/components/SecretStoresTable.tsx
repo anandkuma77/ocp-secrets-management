@@ -258,9 +258,8 @@ export const SecretStoresTable: React.FC<SecretStoresTableProps> = ({ selectedPr
                 variant="plain"
                 onClick={() => toggleDropdown(storeId)}
                 isExpanded={openDropdowns[storeId] || false}
-              >
-                <EllipsisVIcon />
-              </MenuToggle>
+                icon={<EllipsisVIcon />}
+              />
             )}
             shouldFocusToggleOnSelect
           >
