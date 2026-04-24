@@ -9,7 +9,6 @@ import {
   Button,
   Content,
   ContentVariants,
-  Title,
 } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 
@@ -23,10 +22,12 @@ export const NoOperatorsInstalled: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <EmptyState variant={EmptyStateVariant.sm} icon={CubesIcon}>
-      <Title headingLevel="h4" size="md">
-        {t('No supported secrets operators detected')}
-      </Title>
+    <EmptyState
+      titleText={t('No supported secrets operators detected')}
+      headingLevel="h4"
+      variant={EmptyStateVariant.sm}
+      icon={CubesIcon}
+    >
       <EmptyStateBody>
         <Content component={ContentVariants.p}>
           {t(

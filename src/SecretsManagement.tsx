@@ -41,7 +41,10 @@ const OperatorStatusBadge: React.FC<{ status: OperatorStatus }> = ({ status }) =
       <Tooltip content={status.error}>
         <Badge
           isRead
-          style={{ marginLeft: '8px', backgroundColor: 'var(--pf-global--danger-color--100)' }}
+          style={{
+            marginLeft: '8px',
+            backgroundColor: 'var(--pf-t--global--color--status--danger--default)',
+          }}
         >
           {t('Check failed')}
         </Badge>

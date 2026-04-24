@@ -66,11 +66,14 @@ export const ResourceTable: React.FC<ResourceTableProps> = ({
   if (rows.length === 0) {
     return (
       <div className="co-m-pane__body" data-test={`${dataTest}-empty`}>
-        <EmptyState>
+        <EmptyState
+          titleText={
+            <Title size="lg" headingLevel="h4">
+              {emptyStateTitle || t('No resources found')}
+            </Title>
+          }
+        >
           <SearchIcon className="co-m-empty-state__icon" />
-          <Title size="lg" headingLevel="h4">
-            {emptyStateTitle || t('No resources found')}
-          </Title>
           <EmptyStateBody>{emptyStateBody ?? defaultEmptyStateBody}</EmptyStateBody>
         </EmptyState>
       </div>

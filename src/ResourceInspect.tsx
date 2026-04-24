@@ -838,9 +838,12 @@ export const ResourceInspect: React.FC = () => {
       <div className="co-m-pane__body">
         <div className="co-m-pane__heading">
           <div className="co-m-pane__name co-resource-item">
-            <Button variant="plain" onClick={handleBackClick} style={{ marginRight: '16px' }}>
-              <ArrowLeftIcon />
-            </Button>
+            <Button
+              icon={<ArrowLeftIcon />}
+              variant="plain"
+              onClick={handleBackClick}
+              style={{ marginRight: '16px' }}
+            />
             <KeyIcon className="co-m-resource-icon" style={{ marginRight: '8px' }} />
             <Title headingLevel="h1" size="lg">
               {getResourceTypeDisplayName()}: {name}

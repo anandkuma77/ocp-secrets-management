@@ -307,9 +307,8 @@ export const ExternalSecretsTable: React.FC<ExternalSecretsTableProps> = ({ sele
                 variant="plain"
                 onClick={() => toggleDropdown(secretId)}
                 isExpanded={openDropdowns[secretId] || false}
-              >
-                <EllipsisVIcon />
-              </MenuToggle>
+                icon={<EllipsisVIcon />}
+              />
             )}
             shouldFocusToggleOnSelect
           >

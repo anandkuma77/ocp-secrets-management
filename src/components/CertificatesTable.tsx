@@ -229,9 +229,8 @@ export const CertificatesTable: React.FC<CertificatesTableProps> = ({ selectedPr
                 variant="plain"
                 onClick={() => toggleDropdown(certId)}
                 isExpanded={openDropdowns[certId] || false}
-              >
-                <EllipsisVIcon />
-              </MenuToggle>
+                icon={<EllipsisVIcon />}
+              />
             )}
             shouldFocusToggleOnSelect
           >

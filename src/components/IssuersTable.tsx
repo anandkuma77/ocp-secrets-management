@@ -218,9 +218,8 @@ export const IssuersTable: React.FC<IssuersTableProps> = ({ selectedProject }) =
                 variant="plain"
                 onClick={() => toggleDropdown(issuerId)}
                 isExpanded={openDropdowns[issuerId] || false}
-              >
-                <EllipsisVIcon />
-              </MenuToggle>
+                icon={<EllipsisVIcon />}
+              />
             )}
             shouldFocusToggleOnSelect
           >

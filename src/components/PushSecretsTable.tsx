@@ -212,9 +212,8 @@ export const PushSecretsTable: React.FC<PushSecretsTableProps> = ({ selectedProj
                 variant="plain"
                 onClick={() => toggleDropdown(pushSecretId)}
                 isExpanded={openDropdowns[pushSecretId] || false}
-              >
-                <EllipsisVIcon />
-              </MenuToggle>
+                icon={<EllipsisVIcon />}
+              />
             )}
             shouldFocusToggleOnSelect
           >

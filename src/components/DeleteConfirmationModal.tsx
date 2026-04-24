@@ -1,13 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Modal,
-  ModalVariant,
-  Button,
-  Alert,
-  AlertVariant,
-  TextInput,
-} from '@patternfly/react-core';
+import { Button, Alert, AlertVariant, TextInput } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
